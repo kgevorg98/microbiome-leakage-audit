@@ -20,3 +20,21 @@ venv/
 *.xlsx
 *.pptx
 .env
+
+# Private datasets and generated research outputs
+local-data/
+repro/data/
+data/
+audit/
+ext/
+results/
+outputs/
+submission/
+manuscript/
+*.pkl
+*.pickle
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.ipynb_checkpoints/
