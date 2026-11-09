@@ -92,3 +92,16 @@ def test_audit_detects_inflation():
         X, y, g, n_folds=4, seeds=range(3))
     assert out["label_varies_fraction"] == 0.0
     assert out["inflation"] > 0.1
+
+
+def test_audit_input_validation():
+    X, y, g = _toy(n_sub=20, d=2)
+    factory = lambda: make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000))
+    for bad in [dict(n_folds=1), dict(seeds=[]), dict(y=np.zeros(len(y))), dict(subjects=g[:-1])]:
+        kw = dict(X=X, y=y, subjects=g, n_folds=2, seeds=range(1))
+        kw.update(bad)
+        try:
+            lc.audit(factory, **kw)
+            raise AssertionError("Expected a validation failure")
+        except ValueError:
+            pass
