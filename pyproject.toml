@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "microbiome-leakcheck"
 version = "0.3.1"
 description = "Subject-level leakage diagnostics for repeated microbiome observations"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.26",
@@ -16,6 +17,9 @@ authors = [
     {name = "Gevorg Karapetyan"},
     {name = "Gurgen Karapetyan"},
 ]
+
+[project.urls]
+Repository = "https://github.com/kgevorg98/microbiome-leakage-audit"
 
 [project.optional-dependencies]
 test = ["pytest>=8"]
