@@ -1,0 +1,4 @@
+-r requirements.txt
+pyreadr==0.5.9
+scipy==1.17.1
+joblib==1.6.0
