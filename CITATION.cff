@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "Please cite this software if you use its subject-level leakage diagnostics."
+title: "leakcheck: subject-level leakage diagnostics for microbiome classifiers"
+type: software
+version: 0.3.1
+authors:
+  - family-names: Karapetyan
+    given-names: Gevorg
+    orcid: "https://orcid.org/0009-0005-5899-3353"
+  - family-names: Karapetyan
+    given-names: Gurgen
+    orcid: "https://orcid.org/0009-0005-5509-2576"
+repository-code: "https://github.com/kgevorg98/microbiome-leakage-audit"
