@@ -3,10 +3,10 @@ __pycache__/
 *.pyc
 *.pyo
 .venv/
+venv/
 build/
 dist/
 *.egg-info/
-venv/
 .DS_Store
 *.docx
 *.pdf
