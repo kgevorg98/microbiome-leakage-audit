@@ -3,6 +3,7 @@ import pytest
 from sklearn.model_selection import StratifiedGroupKFold
 from analysis.preprocessing import PrevalenceCLR, classifier
 from leakcheck import audit
+from analysis.nested import nested_auc, summarize, SCHEMES
 
 
 def test_prevalence_learned_on_training_only():
@@ -35,3 +36,15 @@ def test_pipeline_audit_on_repeated_samples():
     out = audit(lambda: classifier(.1), X, y, g, n_folds=4, seeds=range(2))
     assert 0 <= out["auc_grouped"] <= 1
     assert out["n_subjects"] == 40
+
+
+def test_nested_pipeline_schemes_and_inflation():
+    rng = np.random.default_rng(3)
+    g = np.repeat(np.arange(24), 4)
+    y = np.repeat(np.arange(24) % 2, 4)
+    X = np.exp(rng.normal(0, .8, (24, 15))[g] + rng.normal(0, .15, (len(g), 15)))
+    table = nested_auc(X, y, g, seeds=range(1), c_grid=[0.01, 1.0])
+    assert sorted(table.scheme) == sorted(SCHEMES)
+    out = summarize(table)
+    assert out["pipeline_inflation"] == out["leaky_pipeline"] - out["grouped_pipeline"]
+    assert out["pipeline_inflation"] > 0.1  # labels carry no signal beyond subject identity
