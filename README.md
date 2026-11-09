@@ -1,19 +1,22 @@
 # leakcheck
 
-`leakcheck` measures the difference between sample-wise and subject-grouped cross-validation in datasets with repeated observations per participant. It also reports repeat structure and label constancy.
+`leakcheck` evaluates subject-level leakage in classifiers trained on repeated microbiome observations. Its principal diagnostic is the difference between sample-wise and subject-grouped cross-validation, accompanied by descriptive measures of within-subject replication.
 
-The repository contains the standalone Python module, its unit tests, and a simulated-data demonstration notebook. No research manuscripts, internal audit reports, or participant-level data are included. The original study was implemented primarily as Python and R scripts; no original Jupyter notebooks were supplied.
+This repository contains the standalone diagnostic, tests, a synthetic-data notebook, and a small workflow for analyzing locally available species-level abundance profiles. It does **not** contain manuscript files, participant-level data, or the complete computational pipeline used to generate all published tables and figures.
 
-## Requirements
+## Installation
 
-Python 3.10+, NumPy, pandas and scikit-learn.
+Python 3.11 is recommended.
 
 ```bash
-pip install -r requirements.txt
+python -m venv .venv
+python -m pip install -r requirements.txt
 python -m pytest -q
 ```
 
-## Usage
+Install `requirements-analysis.txt` as well when running analyses using exported `.rda` matrices.
+
+## Standalone API
 
 ```python
 from sklearn.linear_model import LogisticRegression
@@ -24,20 +27,59 @@ from leakcheck import audit
 result = audit(
     estimator_factory=lambda: make_pipeline(
         StandardScaler(),
-        LogisticRegression(C=0.1, max_iter=2000)
+        LogisticRegression(C=0.1, max_iter=2000),
     ),
     X=features,
     y=labels,
     subjects=subject_ids,
-    n_folds=5
+    n_folds=5,
 )
 print(result)
 ```
 
-The estimator factory must construct a fresh, unfitted model whose data-dependent preprocessing is fitted within cross-validation folds. Each class and grouping structure must permit the requested stratified folds.
+The estimator factory must construct a new, unfitted estimator on each call. Any learned feature filtering, transformation, imputation, scaling, and tuning should be confined to training folds. Group identifiers must distinguish individuals, not samples.
 
-The difference between random and grouped AUC is a diagnostic for validation design, not a correction factor. The exploratory `correct_auc` function is intentionally disabled by default because retrospective correction did not generalise reliably. External validation is still necessary when the intended application concerns new cohorts or settings.
+The random-versus-grouped AUC difference measures sensitivity to the validation scheme. It is **not** a universal correction for a published AUC. The exploratory inverse function `correct_auc` is disabled by default because it has not generalized reliably.
 
-An executable notebook using synthetic observations is available at `examples/subject_leakage_demo.ipynb`. It illustrates the validation contrast, but does not reproduce the published results.
+## Gut-metagenome example
 
-Code version: 0.3.1. The repository does not yet contain the full study reproduction workflow. The standalone diagnostic module and its tests should not be confused with the entire analysis pipeline.
+For a cohort exported from curatedMetagenomicData, arrange local files as:
+
+```text
+local-data/
+  curation/
+    HMP_2019_ibdmdb.tsv
+  matrices/
+    HMP_2019_ibdmdb.relative_abundance.rda
+```
+
+Then execute:
+
+```bash
+python -m pip install -r requirements-analysis.txt
+python -m analysis.run_cohort --data-dir local-data --cohort HMP_2019_ibdmdb --label disease --folds 5 --seeds 10 --C 0.1
+```
+
+The `analysis.preprocessing.PrevalenceCLR` transformer learns the feature prevalence filter on the training fold and then applies the CLR transformation to training and test samples consistently. The loader implements the necessary stool/sample filtering and a duplicate check. It is a **convenience loader**, not an audited replacement for all cohort-specific curation and cross-cohort de-duplication rules from the publication.
+
+The example notebook at [examples/subject_leakage_demo.ipynb](examples/subject_leakage_demo.ipynb) uses simulated participants only. It demonstrates the method; it does not regenerate manuscript results.
+
+## Reproducibility and limitations
+
+- A synthetic input and all Python unit tests can run without downloading biomedical data.
+- Real-cohort execution requires separately obtained, appropriately licensed curation and abundance matrices.
+- Reported full-study results include additional cohort-specific cleaning, nested tuning, simulations, cross-cohort comparisons, and R-based benchmarks. These are **not yet reproduced** by this minimal public repository.
+- Grouped CV addresses sharing an individual between train and test. It does not resolve differences between independent cohorts, batch effects, or changes in case definitions.
+- Some small grouped folds cannot yield reliable AUC estimates; interpretation requires subject-level uncertainty.
+
+Source code does not contain the manuscript, submissions, internal review records, account credentials, or patient-level records.
+
+## Testing
+
+```bash
+python -m pytest -q
+```
+
+GitHub Actions runs the Python test suite on pushes and pull requests. Those tests verify module behavior and synthetic pipelines, not the complete published analysis.
+
+Code version: 0.3.1.
