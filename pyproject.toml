@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "microbiome-leakcheck"
+version = "0.3.1"
+description = "Subject-level leakage diagnostics for repeated microbiome observations"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "pandas>=2.0",
+    "scikit-learn>=1.4",
+]
+authors = [
+    {name = "Gevorg Karapetyan"},
+    {name = "Gurgen Karapetyan"},
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+analysis = ["pyreadr==0.5.9", "scipy>=1.15"]
+
+[tool.setuptools]
+py-modules = ["leakcheck"]
+packages = ["analysis"]
+
+[tool.pytest.ini_options]
+testpaths = ["test_leakcheck.py", "tests"]
