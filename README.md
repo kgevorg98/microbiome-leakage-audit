@@ -2,7 +2,7 @@
 
 `leakcheck` measures the difference between sample-wise and subject-grouped cross-validation in datasets with repeated observations per participant. It also reports repeat structure and label constancy.
 
-The repository contains only the standalone Python module and its unit tests. Research manuscripts, internal audit reports, and participant-level data are not included.
+The repository contains the standalone Python module, its unit tests, and a simulated-data demonstration notebook. No research manuscripts, internal audit reports, or participant-level data are included. The original study was implemented primarily as Python and R scripts; no original Jupyter notebooks were supplied.
 
 ## Requirements
 
@@ -38,4 +38,6 @@ The estimator factory must construct a fresh, unfitted model whose data-dependen
 
 The difference between random and grouped AUC is a diagnostic for validation design, not a correction factor. The exploratory `correct_auc` function is intentionally disabled by default because retrospective correction did not generalise reliably. External validation is still necessary when the intended application concerns new cohorts or settings.
 
-Code version: 0.3.1. The repository does not contain the complete study reproduction workflow. It provides the independently tested diagnostic module.
+An executable notebook using synthetic observations is available at `examples/subject_leakage_demo.ipynb`. It illustrates the validation contrast, but does not reproduce the published results.
+
+Code version: 0.3.1. The repository does not yet contain the full study reproduction workflow. The standalone diagnostic module and its tests should not be confused with the entire analysis pipeline.
