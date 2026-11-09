@@ -99,6 +99,21 @@ def audit(
 ) -> dict:
     """Compare mean fold-averaged ROC AUC using random and grouped splits."""
     X, y, g = np.asarray(X), np.asarray(y), np.asarray(subjects)
+    seeds = tuple(seeds)
+    if X.ndim != 2 or len(X) == 0 or len(X) != len(y) or len(y) != len(g):
+        raise ValueError("X must be a nonempty 2D array with one label and subject ID per row")
+    if n_folds < 2 or len(seeds) == 0:
+        raise ValueError("n_folds must be >= 2 and at least one random seed is required")
+    if len(np.unique(y)) != 2:
+        raise ValueError("ROC AUC requires exactly two classes")
+    counts = np.unique(y, return_counts=True)[1]
+    if counts.min() < n_folds:
+        raise ValueError("Each class must have at least n_folds samples")
+    for seed in seeds:
+        splitter = StratifiedGroupKFold(n_folds, shuffle=True, random_state=seed)
+        for train, test in splitter.split(X, y, g):
+            if len(np.unique(y[train])) < 2 or len(np.unique(y[test])) < 2:
+                raise ValueError("Grouped CV produced a fold with only one class; reduce folds or revise cohorts")
     rnd = [
         cross_val_score(
             estimator_factory(), X, y, scoring="roc_auc", n_jobs=1,
